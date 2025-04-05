@@ -1,24 +1,30 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Verify from "./pages/Verify";
+import Issue from "./pages/Issue";
+import Login from "./pages/Login";
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+
 
 function App() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("loggedInUser");
+    if (stored) setUser(stored);
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Navbar user={user} setUser={setUser} />
+      <Routes>
+      <Route path="/" element={<Home />} />
+<Route path="/login" element={<Login setUser={setUser} />} />
+<Route path="/verify" element={<Verify />} />
+<Route path="/issue" element={user ? <Issue /> : <Navigate to="/login" replace />} />
+<Route path="*" element={<Navigate to="/" replace />} /></Routes>
+    </Router>
   );
 }
 

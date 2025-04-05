@@ -24,8 +24,8 @@ const FileUpload = ({ setLetterData }) => {
         isValid,
         fileHash,
         issuer: details.issuer,
-        issueDate: new Date(details.issueDate * 1000).toLocaleDateString(),
-        expiryDate: new Date(details.expiryDate * 1000).toLocaleDateString(),
+        issueDate: new Date(Number(details.issueDate) * 1000).toLocaleDateString(),
+        expiryDate: new Date(Number(details.expiryDate) * 1000).toLocaleDateString(),
         revoked: details.revoked,
       });
 

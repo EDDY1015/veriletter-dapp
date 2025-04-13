@@ -19,6 +19,7 @@ function Verify() {
   const [loading, setLoading] = useState(false);
 
   const fileInputRef = useRef(null);
+  const BASE_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5001";
 
   const handleVerify = async () => {
     if (!file) return alert("Please upload a PDF");
@@ -43,7 +44,7 @@ function Verify() {
       const wallet = data.issuerWallet;
       let issuerName = wallet;
       try {
-        const res = await fetch(`http://localhost:5001/issuer-by-wallet/${wallet}`);
+        const res = await fetch(`${BASE_URL}/issuer-by-wallet/${wallet}`);
         const json = await res.json();
         issuerName = json.name || wallet;
       } catch (e) {

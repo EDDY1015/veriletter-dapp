@@ -1,0 +1,9 @@
+{
+  "admin@college.com": {
+    "issuerId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "quotaUsed": 3,
+    "quotaLimit": 10000,
+    "wallet": "0x23F80bF14Cb4b3E2dAc4AE70c27d335D60747021",
+    "name": "ABC College"
+  }
+}

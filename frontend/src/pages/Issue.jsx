@@ -1,6 +1,4 @@
-import React, { useState } from "react";
-import { getVerifierWithSigner } from "../utils/contract";
-import { hashFile, hashStudentInfo } from "../utils/hashing";
+import React, { useState, useRef } from "react";
 import {
   Container,
   Paper,
@@ -12,7 +10,7 @@ import {
   Divider,
 } from "@mui/material";
 
-function Issue() {
+function Issue({ canIssue = true, email }) {
   const [file, setFile] = useState(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -20,6 +18,7 @@ function Issue() {
   const [expiryDate, setExpiryDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(null);
+  const fileInputRef = useRef(null);
 
   const handleSubmit = async () => {
     if (!file || !firstName || !lastName || !passport || !expiryDate) {
@@ -30,36 +29,37 @@ function Issue() {
     setStatus(null);
 
     try {
-      const contract = await getVerifierWithSigner();
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("firstName", firstName);
+      formData.append("lastName", lastName);
+      formData.append("passport", passport);
+      formData.append("expiryDate", expiryDate);
+      formData.append("email", email);
 
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      const yourWalletAddress = accounts[0];
+      const res = await fetch("http://localhost:5001/issue", {
+        method: "POST",
+        body: formData,
+      });
 
-      const isAuthorized = await contract.authorizedIssuers(yourWalletAddress);
-      if (!isAuthorized) {
-        setStatus({ success: false, error: "Your wallet is not authorized to issue letters." });
-        setLoading(false);
-        return;
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setStatus({ success: true, fileHash: data.fileHash });
+        setFirstName("");
+        setLastName("");
+        setPassport("");
+        setFile(null);
+        setExpiryDate("");
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      } else {
+        throw new Error(data.error || "Issuance failed");
       }
-
-      const studentHash = hashStudentInfo(firstName, lastName, passport);
-      const fileHash = await hashFile(file);
-      const expiry = Math.floor(new Date(expiryDate).getTime() / 1000);
-
-      const tx = await contract.issueOfferLetter(studentHash, fileHash, expiry);
-      await tx.wait();
-
-      setStatus({ success: true, fileHash });
-      setFirstName("");
-      setLastName("");
-      setPassport("");
-      setFile(null);
-      setExpiryDate("");
     } catch (err) {
       console.error("Issue error:", err);
       setStatus({
         success: false,
-        error: err?.reason || err?.data?.message || err?.message || "Transaction failed",
+        error: err.message || "Transaction failed",
       });
     } finally {
       setLoading(false);
@@ -74,10 +74,15 @@ function Issue() {
         </Typography>
 
         <Box component="form" noValidate sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {/* Upload */}
           <Button variant="outlined" component="label">
             Upload Offer Letter (PDF)
-            <input hidden type="file" accept=".pdf" onChange={(e) => setFile(e.target.files[0])} />
+            <input
+              hidden
+              type="file"
+              accept=".pdf"
+              onChange={(e) => setFile(e.target.files[0])}
+              ref={fileInputRef}
+            />
           </Button>
           {file && (
             <Typography variant="caption" color="text.secondary">
@@ -85,25 +90,9 @@ function Issue() {
             </Typography>
           )}
 
-          {/* Inputs */}
-          <TextField
-            label="First Name"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            fullWidth
-          />
-          <TextField
-            label="Last Name"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            fullWidth
-          />
-          <TextField
-            label="Passport Number"
-            value={passport}
-            onChange={(e) => setPassport(e.target.value)}
-            fullWidth
-          />
+          <TextField label="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} fullWidth />
+          <TextField label="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} fullWidth />
+          <TextField label="Passport Number" value={passport} onChange={(e) => setPassport(e.target.value)} fullWidth />
           <TextField
             label="Expiry Date"
             type="date"
@@ -113,18 +102,16 @@ function Issue() {
             fullWidth
           />
 
-          {/* Submit */}
           <Button
             variant="contained"
-            disabled={loading}
+            disabled={loading || !canIssue}
             onClick={handleSubmit}
             sx={{ backgroundColor: "black", "&:hover": { backgroundColor: "#333" } }}
           >
-            {loading ? "Issuing..." : "Issue Letter"}
+            {canIssue ? (loading ? "Issuing..." : "Issue Letter") : "Quota Reached"}
           </Button>
         </Box>
 
-        {/* Status */}
         {status && (
           <Box mt={4}>
             <Divider sx={{ mb: 2 }} />

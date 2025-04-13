@@ -4,7 +4,9 @@ import Verify from "./pages/Verify";
 import Issue from "./pages/Issue";
 import Login from "./pages/Login";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import Home from "./pages/Home";
+import IssuerDashboard from "./pages/IssuerDashboard";
 
 
 function App() {
@@ -23,7 +25,10 @@ function App() {
 <Route path="/login" element={<Login setUser={setUser} />} />
 <Route path="/verify" element={<Verify />} />
 <Route path="/issue" element={user ? <Issue /> : <Navigate to="/login" replace />} />
-<Route path="*" element={<Navigate to="/" replace />} /></Routes>
+<Route path="*" element={<Navigate to="/" replace />} />
+<Route path="/dashboard" element={user ? <IssuerDashboard user={user} /> : <Navigate to="/login" replace />} />
+</Routes>
+<Footer/>
     </Router>
   );
 }

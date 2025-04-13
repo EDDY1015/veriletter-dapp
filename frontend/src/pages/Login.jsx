@@ -10,11 +10,6 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-const DUMMY_USERS = [
-  { email: "admin@veriletter.com", password: "admin123" },
-  { email: "issuer@college.com", password: "testpass" },
-];
-
 function Login({ setUser }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,22 +17,31 @@ function Login({ setUser }) {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setLoading(true);
-    const match = DUMMY_USERS.find(
-      (u) => u.email === email && u.password === password
-    );
+    setStatus(null);
 
-    setTimeout(() => {
-      if (match) {
-        setStatus({ success: true });
-        setUser({ email });
-        navigate("/issue");
+    try {
+      const res = await fetch("http://localhost:5001/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        localStorage.setItem("loggedInUser", result.email);
+        setUser({ email: result.email });
+        navigate("/dashboard");
       } else {
-        setStatus({ success: false, message: "Invalid credentials" });
+        setStatus({ success: false, message: result.error });
       }
+    } catch (err) {
+      setStatus({ success: false, message: "Server error" });
+    } finally {
       setLoading(false);
-    }, 800); // fake delay
+    }
   };
 
   return (
@@ -76,11 +80,11 @@ function Login({ setUser }) {
 
         {status && (
           <Box mt={3}>
-            {status.success ? (
-              <Alert severity="success">✅ Login successful! Redirecting…</Alert>
-            ) : (
-              <Alert severity="error">❌ {status.message}</Alert>
-            )}
+            <Alert severity={status.success ? "success" : "error"}>
+              {status.success
+                ? "✅ Login successful! Redirecting…"
+                : `❌ ${status.message}`}
+            </Alert>
           </Box>
         )}
       </Paper>

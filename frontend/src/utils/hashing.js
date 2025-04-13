@@ -1,12 +1,10 @@
 import { keccak256, toUtf8Bytes } from "ethers";
 
 /**
- * Hash name + passport together as one student identity hash.
- * Inputs are normalized (lowercase, trimmed).
+ * Hash only the passport number (normalized)
  */
-export function hashStudentInfo(firstName, lastName, passport) {
-  const cleanInput = `${firstName.trim().toLowerCase()}${lastName.trim().toLowerCase()}${passport.trim()}`;
-  return keccak256(toUtf8Bytes(cleanInput));
+export function hashStudentInfo(passport) {
+  return keccak256(toUtf8Bytes(passport.trim().toUpperCase()));
 }
 
 /**

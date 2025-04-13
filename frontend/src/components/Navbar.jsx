@@ -17,23 +17,31 @@ function Navbar({ user, setUser }) {
     navigate("/login");
   };
 
+  const isLoggedIn = user && user.email;
+
   return (
     <AppBar position="static" sx={{ backgroundColor: "black" }}>
       <Container maxWidth="lg">
-        <Toolbar sx={{ justifyContent: "space-between" }}>
+        <Toolbar sx={{ justifyContent: "space-between", flexWrap: "wrap" }}>
           {/* Brand */}
-          <Typography variant="h6" component={Link} to="/" color="white" sx={{ textDecoration: "none" }}>
-            VeriLetter
+          <Typography
+            variant="h6"
+            component={Link}
+            to="/"
+            color="white"
+            sx={{ textDecoration: "none", fontWeight: "bold" }}
+          >
+            DocuChain
           </Typography>
 
           {/* Nav Links */}
-          <Box sx={{ display: "flex", gap: 2 }}>
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
             <Button component={Link} to="/verify" color="inherit">
               Verify
             </Button>
-            {user ? (
+            {isLoggedIn ? (
               <>
-                <Button component={Link} to="/issue" color="inherit">
+                <Button component={Link} to="/dashboard" color="inherit">
                   Issue
                 </Button>
                 <Button onClick={handleLogout} color="inherit">
@@ -47,9 +55,13 @@ function Navbar({ user, setUser }) {
             )}
           </Box>
 
-          {/* User Email */}
-          {user && (
-            <Typography variant="body2" color="white">
+          {/* User Email (if logged in) */}
+          {isLoggedIn && (
+            <Typography
+              variant="body2"
+              color="white"
+              sx={{ ml: 2, mt: { xs: 2, sm: 0 }, wordBreak: "break-all" }}
+            >
               {user.email}
             </Typography>
           )}

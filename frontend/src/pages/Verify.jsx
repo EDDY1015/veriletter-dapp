@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { hashFile, hashStudentInfo } from "../utils/hashing";
 import { getVerifierContract } from "../utils/contract";
 import {
@@ -9,45 +9,61 @@ import {
   TextField,
   Typography,
   Divider,
+  Alert,
 } from "@mui/material";
 
 function Verify() {
   const [file, setFile] = useState(null);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
   const [passport, setPassport] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const fileInputRef = useRef(null);
 
   const handleVerify = async () => {
     if (!file) return alert("Please upload a PDF");
 
     setLoading(true);
-    let fileHash, contract;
+    setResult(null);
 
     try {
-      contract = getVerifierContract();
-      fileHash = await hashFile(file);
-
+      const contract = getVerifierContract();
+      const fileHash = await hashFile(file);
       const data = await contract.getLetterDetails(fileHash);
       const isValid = await contract.isLetterValid(fileHash);
 
+      // Match passport
       let studentMatch = null;
-      if (firstName && lastName && passport) {
-        const studentHash = hashStudentInfo(firstName, lastName, passport);
-        studentMatch = studentHash === data.studentHash;
+      if (passport.trim()) {
+        const studentHash = hashStudentInfo(passport);
+        studentMatch = studentHash === data.subjectIdHash;
+      }
+
+      // 🔁 Lookup issuer name via backend
+      const wallet = data.issuerWallet;
+      let issuerName = wallet;
+      try {
+        const res = await fetch(`http://localhost:5001/issuer-by-wallet/${wallet}`);
+        const json = await res.json();
+        issuerName = json.name || wallet;
+      } catch (e) {
+        console.warn("Failed to fetch issuer name. Showing wallet instead.");
       }
 
       setResult({
         found: true,
-        issuer: data.issuer,
+        issuerName,
+        fileHash,
         issueDate: new Date(Number(data.issueDate) * 1000).toLocaleDateString(),
         expiryDate: new Date(Number(data.expiryDate) * 1000).toLocaleDateString(),
         isRevoked: data.isRevoked,
-        studentMatch,
         isValid,
-        fileHash,
+        studentMatch,
       });
+
+      setFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+
     } catch (err) {
       console.error("Verification failed:", err);
       setResult({ found: false });
@@ -63,10 +79,16 @@ function Verify() {
           ✅ Verify Offer Letter
         </Typography>
 
-        <Box component="form" noValidate sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box component="form" sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <Button variant="outlined" component="label">
             Upload Offer Letter (PDF)
-            <input hidden type="file" accept=".pdf" onChange={(e) => setFile(e.target.files[0])} />
+            <input
+              hidden
+              type="file"
+              accept=".pdf"
+              onChange={(e) => setFile(e.target.files[0])}
+              ref={fileInputRef}
+            />
           </Button>
           {file && (
             <Typography variant="caption" color="text.secondary">
@@ -74,18 +96,6 @@ function Verify() {
             </Typography>
           )}
 
-          <TextField
-            label="First Name (optional)"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            fullWidth
-          />
-          <TextField
-            label="Last Name (optional)"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            fullWidth
-          />
           <TextField
             label="Passport Number (optional)"
             value={passport}
@@ -103,13 +113,15 @@ function Verify() {
           </Button>
         </Box>
 
-        {/* Result */}
+        {/* Result Display */}
         {result && (
           <Box mt={4}>
             <Divider sx={{ my: 2 }} />
             {result.found ? (
               <Box>
-                <Typography variant="subtitle1"><strong>Issuer:</strong> {result.issuer}</Typography>
+                <Typography variant="subtitle1">
+                  <strong>Issuer:</strong> {result.issuerName}
+                </Typography>
                 <Typography variant="subtitle2" sx={{ wordBreak: "break-all" }}>
                   <strong>File Hash:</strong> {result.fileHash}
                 </Typography>
@@ -125,14 +137,12 @@ function Verify() {
                 </Typography>
                 {result.studentMatch !== null && (
                   <Typography>
-                    Student Match: {result.studentMatch ? "✅ Match" : "❌ Mismatch"}
+                    Passport Match: {result.studentMatch ? "✅ Match" : "❌ Mismatch"}
                   </Typography>
                 )}
               </Box>
             ) : (
-              <Typography color="error" fontWeight="bold">
-                ❌ No matching letter found on-chain.
-              </Typography>
+              <Alert severity="error">❌ No matching letter found on-chain.</Alert>
             )}
           </Box>
         )}

@@ -17,20 +17,8 @@ export function getVerifierContract() {
   return new ethers.Contract(contractAddress, VeriLetterABI, provider);
 }
 
-/**
- * Write-enabled contract using MetaMask (signer)
- */
-export async function getVerifierWithSigner() {
-  if (!window.ethereum) {
-    throw new Error("MetaMask not detected. Please install MetaMask.");
-  }
+// 👇 REMOVE MetaMask version entirely
+// No getVerifierWithSigner function anymore
 
-  await window.ethereum.request({ method: "eth_requestAccounts" });
-
-  const provider = new ethers.BrowserProvider(window.ethereum);
-  const signer = await provider.getSigner();
-
-  return new ethers.Contract(contractAddress, VeriLetterABI, signer);
-}
 export const CONTRACT_ADDRESS = contractAddress;
 export const RPC_URL = rpcURL;

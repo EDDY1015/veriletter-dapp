@@ -17,6 +17,9 @@ import Issue from "./Issue";
 import { BarChart } from "@mui/x-charts/BarChart";
 import useIssuedLetters from "../hooks/useIssuedLetters";
 
+// ✅ Use backend env variable (fallback to localhost for dev)
+const BASE_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5001";
+
 function IssuerDashboard({ user }) {
   const [tab, setTab] = useState(0);
   const [search, setSearch] = useState("");
@@ -30,7 +33,7 @@ function IssuerDashboard({ user }) {
     const fetchQuota = async () => {
       if (!user?.email) return;
       try {
-        const res = await fetch(`http://localhost:5001/issuer/${user.email}`);
+        const res = await fetch(`${BASE_URL}/issuer/${user.email}`);
         const data = await res.json();
         setQuota({ total: data.quotaLimit, used: data.quotaUsed });
         setIssuerId(data.issuerId);

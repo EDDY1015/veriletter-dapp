@@ -10,6 +10,9 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
+// ✅ Use backend env variable (fallback to localhost in dev)
+const BASE_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5001";
+
 function Login({ setUser }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,7 +25,7 @@ function Login({ setUser }) {
     setStatus(null);
 
     try {
-      const res = await fetch("http://localhost:5001/login", {
+      const res = await fetch(`${BASE_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

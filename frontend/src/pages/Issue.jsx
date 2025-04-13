@@ -10,6 +10,9 @@ import {
   Divider,
 } from "@mui/material";
 
+// ✅ Get the backend URL from env, fallback to localhost
+const BASE_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5001";
+
 function Issue({ canIssue = true, email }) {
   const [file, setFile] = useState(null);
   const [firstName, setFirstName] = useState("");
@@ -37,7 +40,7 @@ function Issue({ canIssue = true, email }) {
       formData.append("expiryDate", expiryDate);
       formData.append("email", email);
 
-      const res = await fetch("http://localhost:5001/issue", {
+      const res = await fetch(`${BASE_URL}/issue`, {
         method: "POST",
         body: formData,
       });

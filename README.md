@@ -1,6 +1,6 @@
 # DocuChain – Blockchain dApp to Verify Offer Letters
 
-**DocuChain** is a decentralized application (dApp) that enables educational institutions and employers to issue tamper-proof offer letters on the blockchain. It allows immigration officers, students and recruiters to instantly verify the authenticity of uploaded documents using a cryptographic hash, without any need to contact the issuer.
+**DocuChain** is a decentralized application (dApp) that enables educational institutions and employers to issue tamper-proof offer letters on the blockchain. It allows applicants and immigration officers to instantly verify the authenticity of uploaded documents using a cryptographic hash, without any need to contact the issuer.
 
 ---
 

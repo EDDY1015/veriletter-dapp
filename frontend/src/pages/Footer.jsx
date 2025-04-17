@@ -18,7 +18,7 @@ function Footer() {
             <MuiLink href="#" color="inherit" sx={{ pr: 2 }}>
               About
             </MuiLink>
-            <MuiLink href="#" color="inherit" sx={{ pr: 2 }}>
+            <MuiLink component={Link} to="/contact" color="inherit" sx={{ pr: 2 }}>
               Contact
             </MuiLink>
             <MuiLink href="#" color="inherit">

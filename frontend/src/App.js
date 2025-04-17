@@ -7,6 +7,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import IssuerDashboard from "./pages/IssuerDashboard";
+import ContactPage from "./pages/ContactPage";
 
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
 <Route path="/issue" element={user ? <Issue /> : <Navigate to="/login" replace />} />
 <Route path="*" element={<Navigate to="/" replace />} />
 <Route path="/dashboard" element={user ? <IssuerDashboard user={user} /> : <Navigate to="/login" replace />} />
+<Route path="/contact" element={<ContactPage />} />
 </Routes>
 <Footer/>
     </Router>

@@ -27,15 +27,14 @@ function Footer() {
 
           {/* Right Links */}
           <Stack direction="row" spacing={3}>
-            <MuiLink component={Link} to="/" color="inherit" underline="hover">
-              Home
-            </MuiLink>
+           
             <MuiLink component={Link} to="/verify" color="inherit" underline="hover">
               Verify
             </MuiLink>
-            <MuiLink component={Link} to="/login" color="inherit" underline="hover">
-              Login
+            <MuiLink component={Link} to="/contact" color="inherit" underline="hover">
+              Contact Us
             </MuiLink>
+           
           </Stack>
         </Stack>
       </Container>
